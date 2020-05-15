@@ -14,7 +14,7 @@ Accept multiple models with different bits length for the same dataset.
 
 parser = argparse.ArgumentParser(description='Evaluation on three datasets: {Facescrub, YouTubeFaces, VGGFace}; Supported metrics: {mAP, precision, recall, top-k}')
 parser.add_argument('--load', type=str, help='Path to load the model')
-parser.add_argument('--dataset', type=str, default= 'facescrub', help='should be one of {facescrub, youtube, vgg}')
+parser.add_argument('--dataset', type=str, default='facescrub', help='should be one of {facescrub, youtube, vgg}')
 parser.add_argument('-o', '--option', action='store_true', help='specify which metric to evaluate')
 parser.add_argument('--bs', type=int, default=256, help='Batch size of each iteration')
 parser.add_argument('--len', type=int, default=48,
@@ -28,7 +28,6 @@ dataset = args.dataset
 option = args.option
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 cudnn.benchmark = True
-
 
 
 def evaluation(model_path, bits, dataset, option):
@@ -89,9 +88,14 @@ def evaluation(model_path, bits, dataset, option):
 
             top_results = compute_topK(trainB, testB, train_labels, test_labels, device, top_list)
             for i in range(len(top_list)):
-                print("top%d: %.2f%%" %(top_list[i], top_results[i]))
+                print("top%d: %.2f%%" %(top_list[i], 100. * top_results[i]))
             print("=================================")
 
             precision, recall = evaluate_recall_pre(train_labels, test_labels, trainB, testB, device)
             print('Precision with Hamming radius_2 : {:.2%}'.format(precision))
             print('Recall with Hamming radius_2 : {:.2%}'.format(recall))
+
+if __name__ == '__main__':
+
+    assert os.path.exists(os.path.join("./checkpoint", args.load)),  "invalid model path in the default directory"
+    evaluation(model_path, bits, dataset, option)
