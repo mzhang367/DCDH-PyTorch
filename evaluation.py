@@ -70,10 +70,10 @@ def evaluation(model_path, bits, dataset, option):
 
         checkpoint = torch.load('./checkpoint/%s' % model_path)
         print("evaluation on %s" % model_path)
-        net = torch.nn.DataParallel(DFHNet(bits)).to(device)
+        net = DFHNet(bits).to(device)
         criterion = DualClasswiseLoss(num_classes=classes, inner_param=0.1, sigma=0.25, feat_dim=bits, use_gpu=True)
-        net.load_state_dict(checkpoint['backbone_state_dict'])
-        criterion.load_state_dict(checkpoint['clf_state_dict'])
+        net.load_state_dict(checkpoint['backbone'])
+        criterion.load_state_dict(checkpoint['centers'])
         centers_trained = torch.sign(criterion.centers.data)
         net.eval()
         with torch.no_grad():

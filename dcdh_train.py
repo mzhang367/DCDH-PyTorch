@@ -43,7 +43,7 @@ if args.dataset in ['facescrub', 'youtube']:
     trainloader = DataLoader(trainset, batch_size=args.bs, shuffle=True)
     testset = MyDataset(args.dataset, transform=transform_tensor, train=False)
     testloader = DataLoader(testset, batch_size=args.bs, shuffle=False)
-    net = DFHNet(args.len).to(device)
+    net = torch.nn.DataParallel(DFHNet(args.len)).to(device)
     classes = len(np.unique(trainset.train_y))
 
 else:
@@ -150,24 +150,17 @@ def train(EPOCHS):
             net.eval()
             with torch.no_grad():
                 centers_trained = torch.sign(criterion.centers.data).cuda()
-                since = time.time()
                 trainB, train_labels = compute_result(trainloader, net, device, centers_trained)
                 testB, test_labels = compute_result(testloader, net, device, centers_trained)
-                time_elapsed = time.time() - since
-                print("Code generated in {:.0f}min {:.0f}s ".format(time_elapsed // 60, time_elapsed % 60))
-
-                since = time.time()
                 mAP = compute_mAP(trainB, testB, train_labels, test_labels, device)
-                time_elapsed = time.time() - since
                 print('[Evaluate Phase] Epoch: %d\t mAP: %.2f%%' % (epoch+1, 100. * float(mAP)))
-                print("Calculate mAP in {:.0f} min {:.0f}s".format(time_elapsed // 60, time_elapsed % 60))
 
         if dcdh_loss.avg < best_loss:
             print('Saving..')
             if not os.path.isdir('checkpoint'):
                 os.mkdir('checkpoint')
-            torch.save({'backbone_state_dict': net.state_dict(),
-            'clf_state_dict': criterion.state_dict()}, './checkpoint/%s' % args.save)
+            torch.save({'backbone': net.module.state_dict(),
+                        'centers': criterion.state_dict()}, './checkpoint/%s' % args.save)
             best_loss = dcdh_loss.avg
             best_epoch = epoch
 
