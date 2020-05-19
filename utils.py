@@ -197,7 +197,7 @@ def compute_result(dataloader, net, device, centers=None):
 def compute_topK(trn_binary, tst_binary, trn_label, tst_label, device, top_list):
 
     """
-    compute mean precision of returned top-k results based on hamming ranking
+    compute mean precision of returned top-k results based on Hamming ranking
     """
 
     top_p = torch.Tensor(tst_binary.size(0), len(top_list)).to(device)
@@ -237,6 +237,10 @@ def compute_mAP(trn_binary, tst_binary, trn_label, tst_label, device):
 
 def evaluate_recall_pre(train_labels, test_labels, train_bits, test_bits, device):
 
+    """
+    Note labels are with shape (x, 1)
+    """
+
     num_test = test_bits.size(0)
 
     hammRadius = 2  # precision and recall are based on hamming distance 2.
@@ -275,7 +279,13 @@ def evaluate_recall_pre(train_labels, test_labels, train_bits, test_bits, device
     return p, r
 
 
-def evaluate_pr_ranking(trn_binary, tst_binary, trn_label, tst_label, ranking_list):
+def evaluate_pre_curve(trn_binary, tst_binary, trn_label, tst_label, ranking_list):
+
+    """
+    Calculate points to plot the precision curve w.r.t. Hamming ranking given a series of ranking positions
+    args:
+        ranking_list: the ranking positions to be evaluated
+    """
 
     top_p = np.ndarray((tst_binary.shape[0], len(ranking_list)))
     top_r = np.ndarray((tst_binary.shape[0], len(ranking_list)))

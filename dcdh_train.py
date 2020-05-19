@@ -48,8 +48,8 @@ if args.dataset in ['facescrub', 'youtube']:
 
 else:
     EPOCHS = 100
-    trainPaths = "./vgg_face2/train"
-    testPaths = "./vgg_face2/test"
+    trainPaths = "./vggface2/train"
+    testPaths = "./vggface2/test"
     cropped_size = 160
     Normalize = transforms.Normalize((0.5141, 0.4074, 0.3588), (1, 1, 1))
 
