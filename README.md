@@ -1,7 +1,13 @@
 # DCDH: Deep Hashing Method for Face Image Retrieval
-This repository contains the source codes of our paper submitted to ECCV20: **Deep Center-Based Dual-Constrained Hashing for Semantics-Preserving Face Image Retrieval** implemented by PyTorch. 
+This repository contains the source codes of our paper: **Deep Center-Based Dual-Constrained Hashing for Discriminative Face Image Retrieval** implemented by PyTorch.
+
+# Authors
+**Ming Zhang, Xuefei Zhe and Hong Yan**
+
+from Department of Electrical Engineering, City University of Hong Kong and Tencent AI Lab
+
 # Introduction
-We propose a novel center-based deep hashing framework, which ensures the intra-class samples to be closer to the corresponding class center than to other centers in Hamming space. The dual-constraint of the framework jointly minimizes the Hamming distance from intra-class samples to the corresponding class center while maximizing the Hamming distance between pairwise centers. Besides, we apply a regression term connecting labels and binary codes, which further contributes to discriminative hashing learning. Experiments on three large-scale datasets show that the proposed method outperforms state-of-the-art methods under various compared code lengths and several commonly-used evaluation metrics. 
+Distinguished from existing pairwise/triplet labels-based deep hashing works, we propose a novel center-based framework integrating end-to-end hashing learning and class centers learning simultaneously. The dual constraint of the framework jointly minimizes the Hamming distance from intra-class samples to the corresponding class center in hashing code space while maximizing the Hamming distance between pairwise centers. Moreover, with the introduced regression matrix, binary codes are mutually guided by hashing outputs and label information, which further contributes to semantics-preserving hashing learning. Experiments on three large-scale datasets show that the proposed method outperforms state-of-the-art methods under various code lengths and several commonly-used evaluation metrics. 
 The illustration of proposed DCDH framework is shown as following: <br>
 
 ![method illustration](/images/dcdh_framework.png)
