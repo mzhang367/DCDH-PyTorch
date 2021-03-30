@@ -49,7 +49,7 @@ We directly use the same data of FaceScrub and YouTube Faces datasets as release
  
  https://drive.google.com/open?id=1PaXIfSrw1SC1uiv4Affgm882-Q-w_icl
  
- # Trained Model
+ # Models
  We release the trained models on two datasets: FaceScrub and YouTube Faces under four different code lengths {12, 24, 36, 48}, respectively. The models are named following the rule of "dcdh_\[*dataset*]\[*length*].tar" and can be downloaded [here](https://drive.google.com/open?id=152TYljUGI4tDdJJhtjDr9bVLYRxuDK5n).
  
  # Usage
