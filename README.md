@@ -1,4 +1,4 @@
-# DCDH: Class-wise labels-based deep supervised hashing method
+# DCDH
 This repository contains source codes of our paper: **Deep Center-Based Dual-Constrained Hashing for Discriminative Face Image Retrieval** implemented by PyTorch.
 
 # Citation
