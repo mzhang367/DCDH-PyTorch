@@ -1,16 +1,29 @@
-# DCDH: Deep Hashing Method for Face Image Retrieval
-This repository contains the source codes of our paper: **Deep Center-Based Dual-Constrained Hashing for Discriminative Face Image Retrieval** implemented by PyTorch.
+# DCDH: class-wise labels-based deep supervised hashing method
+This repository contains source codes of our paper: **Deep Center-Based Dual-Constrained Hashing for Discriminative Face Image Retrieval** implemented by PyTorch.
 
-# Authors
-**Ming Zhang, Xuefei Zhe and Hong Yan**
+# Citation
+If you find the codes are helpful to your research, please consider citing our PR paper:
+```
+@article{zhang2021deep,
+  title={Deep Center-Based Dual-Constrained Hashing for Discriminative Face Image Retrieval},
+  author={Ming Zhang and Xuefei Zhe and Shifeng Chen and Hong Yan},
+  journal={Pattern Recognition},
+  pages={to appear},
+  year={2021},
+  publisher={Elsevier}
+}
+```
+# Developed by
+**Ming Zhang<sup>1</sup> and Xuefei Zhe<sup>2</sup>**
 
-from Department of Electrical Engineering, City University of Hong Kong and Tencent AI Lab
+<sup>1</sup> Department of Electrical Engineering, City University of Hong Kong 
 
-# Introduction
-Distinguished from existing pairwise/triplet labels-based deep hashing works, we propose a novel center-based framework integrating end-to-end hashing learning and class centers learning simultaneously. The dual constraint of the framework jointly minimizes the Hamming distance from intra-class samples to the corresponding class center in hashing code space while maximizing the Hamming distance between pairwise centers. Moreover, with the introduced regression matrix, binary codes are mutually guided by hashing outputs and label information, which further contributes to semantics-preserving hashing learning. Experiments on three large-scale datasets show that the proposed method outperforms state-of-the-art methods under various code lengths and several commonly-used evaluation metrics. 
-The illustration of proposed DCDH framework is shown as following: <br>
+<sup>2</sup> Tencent AI Lab
 
+# Overview
 ![method illustration](/images/dcdh_framework.png)
+Illustration of DCDH framework. ***θ***, ***M***, ***B***, and ***W*** represent the network parameters, class centers, binary hashing codes, and regression matrix, respectively. The proposed dual constraint on class centers aims to pull intra-class samples to the corresponding class center while pushing pairwise centers as far as possible. By ***W***, ***B*** is mutually determined by the hashing layer output and labels information. The arrows between every two modules show the information forward/backward-propagation.
+
 # Prerequisites
 - Python >=3.6
 - PyTorch >=1.2
