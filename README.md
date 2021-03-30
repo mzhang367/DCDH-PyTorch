@@ -1,8 +1,15 @@
-# DCDH
-This repository contains source codes of our paper: **Deep Center-Based Dual-Constrained Hashing for Discriminative Face Image Retrieval** implemented by PyTorch.
+# Deep Center-Based Dual-Constrained Hashing for Discriminative Face Image Retrieval (DCDH)
+This repository contains the PyTorch implementation of our paper.
+
+# Developed by
+**Ming Zhang<sup>1</sup> and Xuefei Zhe<sup>2</sup>**
+
+<sup>1</sup> Department of Electrical Engineering, City University of Hong Kong 
+
+<sup>2</sup> Tencent AI Lab
 
 # Citation
-If you find the codes are helpful to your research, please consider citing our PR paper:
+If you find the codes are useful to your research, please consider citing our PR paper:
 ```
 @article{zhang2021deep,
   title={Deep Center-Based Dual-Constrained Hashing for Discriminative Face Image Retrieval},
@@ -13,17 +20,11 @@ If you find the codes are helpful to your research, please consider citing our P
   publisher={Elsevier}
 }
 ```
-# Developed by
-**Ming Zhang<sup>1</sup> and Xuefei Zhe<sup>2</sup>**
-
-<sup>1</sup> Department of Electrical Engineering, City University of Hong Kong 
-
-<sup>2</sup> Tencent AI Lab
 
 # Overview
-![method illustration](/images/dcdh_framework.png)
-<br>
-Illustration of DCDH framework. ***θ***, ***M***, ***B***, and ***W*** represent the network parameters, class centers, binary hashing codes, and regression matrix, respectively. The proposed dual constraint on class centers aims to pull intra-class samples to the corresponding class center while pushing pairwise centers as far as possible. By ***W***, ***B*** is mutually determined by the hashing layer output and labels information. The arrows between every two modules show the information forward/backward-propagation.
+<img src="/images/dcdh_framework.png" alt="drawing" width="75%"/>
+<p></p>
+Illustration of the proposed framework. ***θ***, ***M***, ***B***, and ***W*** represent the network parameters, class centers, binary hashing codes, and regression matrix, respectively. The proposed dual constraint on class centers aims to pull intra-class samples to the corresponding class center while pushing pairwise centers as far as possible. By ***W***, ***B*** is mutually determined by the hashing layer output and labels information. The arrows between every two modules show the information forward/backward-propagation.
 
 # Prerequisites
 - Python >=3.6
