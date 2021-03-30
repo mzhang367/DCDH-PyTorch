@@ -1,4 +1,4 @@
-# DCDH: class-wise labels-based deep supervised hashing method
+# DCDH: Class-wise labels-based deep supervised hashing method
 This repository contains source codes of our paper: **Deep Center-Based Dual-Constrained Hashing for Discriminative Face Image Retrieval** implemented by PyTorch.
 
 # Citation
@@ -22,6 +22,7 @@ If you find the codes are helpful to your research, please consider citing our P
 
 # Overview
 ![method illustration](/images/dcdh_framework.png)
+<br>
 Illustration of DCDH framework. ***θ***, ***M***, ***B***, and ***W*** represent the network parameters, class centers, binary hashing codes, and regression matrix, respectively. The proposed dual constraint on class centers aims to pull intra-class samples to the corresponding class center while pushing pairwise centers as far as possible. By ***W***, ***B*** is mutually determined by the hashing layer output and labels information. The arrows between every two modules show the information forward/backward-propagation.
 
 # Prerequisites
