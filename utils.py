@@ -46,10 +46,6 @@ def get_data(dataset, train=False):
         root_dir_train = "./YouTube/train"
         root_dir_test = "./YouTube/test"
 
-    '''else:
-        trainPaths = "./vgg_face2/train"
-        testPaths = "./vgg_face2/test"
-    '''
 
     if train:
         dir = root_dir_train
@@ -168,28 +164,21 @@ class Logger(object):
             self.file.close()
 
 
-def compute_result(dataloader, net, device, centers=None):
+def compute_result(dataloader, net, device):
 
-    """
-    args:
-        centers: when not none, using centers to help generate more compact hashing codes
-    """
 
     hash_codes = []
     label = []
     for i, (imgs, cls, *_) in enumerate(dataloader):
         imgs, cls = imgs.to(device), cls.to(device)
         hash_values = net(imgs)
-        if centers is not None:
-            center_distance = 0.5*(hash_values.size(1) - torch.mm(torch.sign(hash_values.data), centers.t()))
-            hash_code = centers[torch.argsort(center_distance, dim=1)[:, 0]]
-            hash_codes.append(hash_code)
-        else:
-            hash_codes.append(hash_values.data)
+
+        hash_codes.append(hash_values.data)
 
         label.append(cls)
 
-    B = torch.sign(torch.cat(hash_codes))
+    hash_codes = torch.cat(hash_codes)
+    B = torch.where(hash_codes > 0.0, torch.tensor([1.0]).cuda(), torch.tensor([-1.0]).cuda())
 
     return B, torch.cat(label)
 
@@ -228,7 +217,7 @@ def compute_mAP(trn_binary, tst_binary, trn_label, tst_label, device):
         correct = (query_label == trn_label[query_result]).float()
         N = torch.sum(correct)
         Ns = torch.arange(1, N+1).float().to(device)
-        index = (correct.nonzero() + 1)[:, 0:1].squeeze(dim=1).float()
+        index = (torch.nonzero(correct, as_tuple=False)+1)[:, 0].float()
         AP.append(torch.mean(Ns / index))
 
     mAP = torch.mean(torch.Tensor(AP))

@@ -164,6 +164,80 @@ class DFHNet(nn.Module):
         return hash_a
 
 
+class Block(nn.Module):
+    def __init__(self, channels):
+        super().__init__()
+        self.conv1 = nn.Conv2d(channels, channels, kernel_size=3, stride=1, padding=1, bias=False)
+        self.bn1 = nn.BatchNorm2d(channels)
+        self.prelu1 = nn.PReLU(channels)
+        self.conv2 = nn.Conv2d(channels, channels, kernel_size=3, stride=1, padding=1, bias=False)
+        self.bn2 = nn.BatchNorm2d(channels)
+        self.prelu2 = nn.PReLU(channels)
+    def forward(self, x):
+        short_cut = x
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.prelu1(x)
+        x = self.conv2(x)
+        x = self.bn2(x)
+        x = self.prelu2(x)
+
+        return x + short_cut
+
+
+class SphereNet_hashing(nn.Module):
+    """
+    The CNNs used in paper: "SphereFace: Deep Hypersphere Embedding for Face Recognition"
+    """
+    def __init__(self, num_layers=64, hashing_bits=48, clf=None):
+        super().__init__()
+        assert num_layers in [20, 64], 'spherenet num_layers should be 20 or 64'
+        if num_layers == 20:
+            layers = [1, 2, 4, 1]
+        elif num_layers == 64:
+            layers = [3, 8, 16, 3]
+        else:
+            raise ValueError('sphere' + str(num_layers) + "is not supported!")
+        filter_list = [3, 64, 128, 256, 512]
+        block = Block
+        self.clf = clf
+        self.hashing_bits = hashing_bits
+        self.layer1 = self._make_layer(block, filter_list[0], filter_list[1], layers[0], stride=2)
+        self.layer2 = self._make_layer(block, filter_list[1], filter_list[2], layers[1], stride=2)
+        self.layer3 = self._make_layer(block, filter_list[2], filter_list[3], layers[2], stride=2)
+        self.layer4 = self._make_layer(block, filter_list[3], filter_list[4], layers[3], stride=2)
+        self.fc = nn.Linear(512*7*7, 512)
+        self.bn = nn.BatchNorm1d(512)
+        self.logits = nn.Linear(512, self.hashing_bits)
+        self.bn_last = nn.BatchNorm1d(self.hashing_bits)
+        self.drop = nn.Dropout()
+
+    def _make_layer(self, block, inplanes, planes, num_units, stride):
+        layers = []
+        layers.append(nn.Conv2d(inplanes, planes, 3, stride, 1))
+        layers.append(nn.BatchNorm2d(planes))
+        layers.append(nn.PReLU(planes))
+        for i in range(num_units):
+            layers.append(block(planes))
+        return nn.Sequential(*layers)
+
+    def forward(self, x):
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+        x = x.view(x.size(0), -1)
+        x = self.drop(x)
+        x = self.fc(x)
+        x = self.bn(x)
+        # x = self.drop(x)
+        x = self.logits(x)
+        out = self.bn_last(x)
+
+        return out
+
+
+
 if __name__ == '__main__':
 
     fake_data = torch.randn(2, 3, 32, 32)

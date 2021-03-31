@@ -1,31 +1,26 @@
 from utils import *
-from model import DFHNet
+from model import DFHNet, SphereNet_hashing
 import torch.optim as optim
 from datetime import datetime
 import sys
 import argparse
-from Loss import DualClasswiseLoss
+from loss import DualClasswiseLoss
 from torch.utils.data import DataLoader
 import time
 import torch.backends.cudnn as cudnn
 from torchvision import datasets
-from InceptionRes_ft_pytorch.inception_resnet_v1 import InceptionResnetV1
-
-
 
 parser = argparse.ArgumentParser(description='PyTorch Implementation of Paper: Deep Center-based Dual-constrained Hashing(DCDH).')
-parser.add_argument('--lr1', default=0.005, type=float, help='learning rate of backbone network')
-parser.add_argument('--lr2', default=0.005, type=float, help='learning rate of loss layer')
-
+parser.add_argument('--lr', default=0.005, type=float, help='learning rate of backbone network and hashing loss layer')
+# recommend using lr = 0.01 for VggFace2 dataset
 parser.add_argument('--save', type=str, help='path to saving model')
-parser.add_argument('--dataset', type=str, default='facescrub', help='should be one of {facescrub, youtube, vgg}')
+parser.add_argument('--dataset', type=str, default='facescrub', help='should be one of {facescrub, youtube, vggface2}')
 parser.add_argument('--bs', type=int, default=256, help='Batch size of each iteration')
 parser.add_argument('--len', type=int, default=48, help='length of hashing codes,  should be one of {12, 24, 36, 48}')
 
 # hyper params.
 parser.add_argument('--sigma', default=0.25, type=float, help='class gap of ClasswiseLoss')
 parser.add_argument('--inner_param', default=0.1, type=float, help='balance weight on two constraints')
-parser.add_argument('--lamda', default=1, type=float, help='regularization on regression')
 parser.add_argument('--eta', default=0.01, type=float, help='quantization weight')
 
 args = parser.parse_args()
@@ -33,57 +28,64 @@ args = parser.parse_args()
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 cudnn.benchmark = True
 
+class adjust_lr:
+    """
+    create a class instance;
+    multiply DECAY every STEP epochs
+    """
+    def __init__(self, step, decay):
+        self.step = step
+        self.decay = decay
+
+    def adjust(self, optimizer, epoch):
+        lr = args.lr * (self.decay ** (epoch // self.step))
+        for i, param_group in enumerate(optimizer.param_groups):
+            param_group['lr'] = lr
+        return lr
+
 
 if args.dataset in ['facescrub', 'youtube']:
 
-    EPOCHS = 700
+    EPOCHS = 600
     transform_tensor = transforms.Compose([
         transforms.ToTensor()])
     trainset = MyDataset(args.dataset, transform=transform_tensor, train=True)
-    trainloader = DataLoader(trainset, batch_size=args.bs, shuffle=True)
+    trainloader = DataLoader(trainset, batch_size=args.bs, shuffle=True, num_workers=4)
     testset = MyDataset(args.dataset, transform=transform_tensor, train=False)
-    testloader = DataLoader(testset, batch_size=args.bs, shuffle=False)
+    testloader = DataLoader(testset, batch_size=args.bs, shuffle=False, num_workers=4)
     net = torch.nn.DataParallel(DFHNet(args.len)).to(device)
     classes = len(np.unique(trainset.train_y))
+    scheduler = adjust_lr(100, 0.5)
 
 else:
-    EPOCHS = 100
+    EPOCHS = 150
     trainPaths = "./vggface2/train"
     testPaths = "./vggface2/test"
-    cropped_size = 160
-    Normalize = transforms.Normalize((0.5141, 0.4074, 0.3588), (1, 1, 1))
 
     transform_train = transforms.Compose([
-        transforms.Resize(cropped_size),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        Normalize,
+                    transforms.Resize(120),
+                    transforms.RandomCrop(112),
+                    transforms.RandomHorizontalFlip(),
+                    transforms.ToTensor(),
+                    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
     ])
 
-    transform_validation = transforms.Compose([
-        transforms.Resize(cropped_size),
-        transforms.ToTensor(),
-        Normalize,
-     ])
+    transform_test = transforms.Compose([
+                    transforms.Resize(120),
+                    transforms.CenterCrop(112),
+                    transforms.ToTensor(),
+                    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+    ])
 
     trainset = datasets.ImageFolder(root=trainPaths, transform=transform_train)
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=args.bs, shuffle=True, num_workers=6)
-    testset = datasets.ImageFolder(root=testPaths, transform=transform_validation)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=args.bs, shuffle=False, num_workers=6)
+    trainloader = DataLoader(trainset, batch_size=args.bs, shuffle=True, num_workers=4)
+    testset = datasets.ImageFolder(root=testPaths, transform=transform_test)
+    testloader = DataLoader(testset, batch_size=args.bs, shuffle=False, num_workers=4)
     classes = len(trainset.classes)
-    Inception = InceptionResnetV1(pretrained="vggface2", fc=True, num_bits=args.len)
-    net = torch.nn.DataParallel(Inception).to(device)
+    net = SphereNet_hashing(num_layers=20, hashing_bits=args.len)
+    net = torch.nn.DataParallel(net).to(device)
+    scheduler = adjust_lr(50, 0.1)
 
-
-def adjust_learning_rate(optimizer, epoch):
-
-    """Sets the learning rate to the initial LR decayed by 0.5 every 100 epochs"""
-    lr = []
-    lr.append(args.lr1 * (0.5 ** (epoch // 100)))
-    lr.append(args.lr2 * (0.5 ** (epoch // 100)))
-    for i, param_group in enumerate(optimizer.param_groups):
-        param_group['lr'] = lr[i]
-    return lr
 
 
 def train(EPOCHS):
@@ -109,8 +111,8 @@ def train(EPOCHS):
     best_loss = 1e4
     if args.dataset in ['facescrub', 'youtube']:
         optimizer = optim.Adam([
-            {'params': net.module.parameters(), 'weight_decay': 1e-4, 'lr': args.lr1, 'amsgrad': True},
-            {'params':  criterion.parameters(), 'weight_decay': 1e-4, 'lr': args.lr2}
+            {'params': net.module.parameters(), 'weight_decay': 1e-4, 'lr': args.lr, 'amsgrad': True},
+            {'params':  criterion.parameters(), 'weight_decay': 1e-4, 'lr': args.lr}
         ])
     else:
         optimizer = optim.SGD([
@@ -123,21 +125,20 @@ def train(EPOCHS):
         print('==> Epoch: %d' % (epoch + 1))
         net.train()
         dcdh_loss = AverageMeter()
-        adjust_learning_rate(optimizer, epoch)
+        scheduler.adjust(optimizer, epoch)
         # epoch_start = time.time()
         for batch_id, (imgs, labels) in enumerate(trainloader):
             imgs, labels = imgs.to(device), labels.to(device)
             optimizer.zero_grad()
             hash_bits = net(imgs)
-            loss_dual = criterion(hash_bits, labels)################ difference between imageloader and custom loader
+            loss_dual = criterion(hash_bits, labels)
             hash_binary = torch.sign(hash_bits)
             batchY = EncodingOnehot(labels, classes).cuda()
-            W = torch.mm(torch.inverse(torch.mm(torch.transpose(batchY, 0, 1), batchY) + args.lamda * torch.eye(batchY.size(1)).cuda()),
-            torch.mm(torch.transpose(batchY, 0, 1), hash_binary))    # Update W
+            W = torch.pinverse(batchY.t() @ batchY) @ batchY.t() @ hash_binary           # Update W
 
             batchB = torch.sign(torch.mm(batchY, W) + args.eta * hash_bits)  # Update B
 
-            loss_vertex = (hash_bits - batchB).pow(2).sum() / len(imgs)
+            loss_vertex = (hash_bits - batchB).pow(2).sum() / len(imgs)     # quantization loss
             loss_h = loss_dual + args.eta * loss_vertex
 
             dcdh_loss.update(loss_h.item(), len(imgs))
@@ -149,9 +150,9 @@ def train(EPOCHS):
         if (epoch+1) % 10 == 0:
             net.eval()
             with torch.no_grad():
-                centers_trained = torch.sign(criterion.centers.data).cuda()
-                trainB, train_labels = compute_result(trainloader, net, device, centers_trained)
-                testB, test_labels = compute_result(testloader, net, device, centers_trained)
+                # centers_trained = torch.sign(criterion.centers.data).cuda()
+                trainB, train_labels = compute_result(trainloader, net, device)
+                testB, test_labels = compute_result(testloader, net, device)
                 mAP = compute_mAP(trainB, testB, train_labels, test_labels, device)
                 print('[Evaluate Phase] Epoch: %d\t mAP: %.2f%%' % (epoch+1, 100. * float(mAP)))
 
@@ -184,6 +185,6 @@ if __name__ == '__main__':
     sys.stdout = Logger(os.path.join(save_dir,
     str(args.len) + 'bits' + '_' + args.dataset + '_' + datetime.now().strftime('%m%d%H%M') + '.txt'))
     print("[Configuration] Training on dataset: %s\n  Len_bits: %d\n Batch_size: %d\n learning rate: %.3f\n #Epoch: %d\n"
-    %(args.dataset, args.len, args.bs, args.lr1, EPOCHS))
-    print("HyperParams:\nsigma: %.3f\t inner_param: %.4f\t eta: %.4f\t lamda: %.4f" % (args.sigma, args.inner_param, args.eta, args.lamda))
+    %(args.dataset, args.len, args.bs, args.lr, EPOCHS))
+    print("HyperParams:\nsigma: %.3f\t inner_param: %.4f\t eta: %.4f\t" % (args.sigma, args.inner_param, args.eta))
     train(EPOCHS)
