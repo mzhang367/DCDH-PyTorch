@@ -53,7 +53,7 @@ if args.dataset in ['facescrub', 'youtube']:
     trainloader = DataLoader(trainset, batch_size=args.bs, shuffle=True, num_workers=4)
     testset = MyDataset(args.dataset, transform=transform_tensor, train=False)
     testloader = DataLoader(testset, batch_size=args.bs, shuffle=False, num_workers=4)
-    net = torch.nn.DataParallel(DFHNet(args.len)).to(device)
+    net = DFHNet(args.len).to(device)
     classes = len(np.unique(trainset.train_y))
     scheduler = adjust_lr(100, 0.5)
 
@@ -82,8 +82,7 @@ else:
     testset = datasets.ImageFolder(root=testPaths, transform=transform_test)
     testloader = DataLoader(testset, batch_size=args.bs, shuffle=False, num_workers=4)
     classes = len(trainset.classes)
-    net = SphereNet_hashing(num_layers=20, hashing_bits=args.len)
-    net = torch.nn.DataParallel(net).to(device)
+    net = SphereNet_hashing(num_layers=20, hashing_bits=args.len).to(device)
     scheduler = adjust_lr(50, 0.1)
 
 

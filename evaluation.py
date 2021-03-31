@@ -1,6 +1,5 @@
 from utils import *
-from model import DFHNet
-from loss import DualClasswiseLoss
+from model import DFHNet, SphereNet_hashing
 import torch.backends.cudnn as cudnn
 import argparse
 from torchvision import datasets
@@ -15,7 +14,6 @@ Support evaluation metrics: mAP, top-k, Precision@H=2, Recall@H=2
 parser = argparse.ArgumentParser(description='Evaluation on three datasets: {Facescrub, YouTubeFaces, VGGFace}; Supported metrics: {mAP, precision, recall, top-k}')
 parser.add_argument('--load', type=str, help='Path to load the model')
 parser.add_argument('--dataset', type=str, default='facescrub', help='should be one of {facescrub, youtube, vgg}')
-# parser.add_argument('-o', '--option', action='store_true', help='specify which metric to evaluate')
 parser.add_argument('--bs', type=int, default=256, help='Batch size of each iteration')
 parser.add_argument('--len', type=int, default=48,
                     help='length of hashing codes,  should be one of {12, 24, 36, 48}')
@@ -25,7 +23,6 @@ args = parser.parse_args()
 model_path = args.load
 bits = args.len
 dataset = args.dataset
-# option = args.option
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 cudnn.benchmark = True
 
@@ -42,6 +39,8 @@ def evaluation(model_path, bits, dataset):
         classes = len(np.unique(trainset.train_y))
         testset = MyDataset(dataset, transform=transform_tensor, train=False)
         testloader = DataLoader(testset, batch_size=args.bs, shuffle=False)
+        net = DFHNet(bits)
+
     else:
         trainPaths = "./vgg_face2/train"
         testPaths = "./vgg_face2/test"
@@ -57,12 +56,12 @@ def evaluation(model_path, bits, dataset):
 
         testset = datasets.ImageFolder(root=testPaths, transform=transform_test)
         testloader = torch.utils.data.DataLoader(testset, batch_size=args.bs, shuffle=False, num_workers=4)
-
+        net = SphereNet_hashing(num_layers=20, hashing_bits=bits)
+    net.to(device)
     top_list = torch.tensor([1, 5, 10]).int().tolist()
 
     checkpoint = torch.load('./checkpoint/%s' % model_path)
     print("evaluation on %s" % model_path)
-    net = DFHNet(bits).to(device)
     net.load_state_dict(checkpoint['backbone'])
 
     net.eval()
