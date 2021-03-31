@@ -166,15 +166,15 @@ class Logger(object):
 
 def compute_result(dataloader, net, device):
 
-
+    """
+    return hashing codes of data with shape (N, len_bits) and its labels (N, )
+    """
     hash_codes = []
     label = []
     for i, (imgs, cls, *_) in enumerate(dataloader):
         imgs, cls = imgs.to(device), cls.to(device)
         hash_values = net(imgs)
-
         hash_codes.append(hash_values.data)
-
         label.append(cls)
 
     hash_codes = torch.cat(hash_codes)
@@ -206,9 +206,6 @@ def compute_topK(trn_binary, tst_binary, trn_label, tst_label, device, top_list)
 
 
 def compute_mAP(trn_binary, tst_binary, trn_label, tst_label, device):
-    """
-    Note labels are with shape (x, 1)
-    """
 
     AP = []
     for i in range(tst_binary.size(0)):
@@ -227,12 +224,12 @@ def compute_mAP(trn_binary, tst_binary, trn_label, tst_label, device):
 def evaluate_recall_pre(train_labels, test_labels, train_bits, test_bits, device):
 
     """
-    Note labels are with shape (x, 1)
+    Precision and Recall are based on 2 hamming distances
     """
 
     num_test = test_bits.size(0)
 
-    hammRadius = 2  # precision and recall are based on hamming distance 2.
+    hammRadius = 2
     q = train_bits.shape[1]
 
     precisions = torch.zeros((num_test)).to(device)
