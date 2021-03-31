@@ -110,12 +110,12 @@ def train(EPOCHS):
     best_loss = 1e4
     if args.dataset in ['facescrub', 'youtube']:
         optimizer = optim.Adam([
-            {'params': net.module.parameters(), 'weight_decay': 1e-4, 'lr': args.lr, 'amsgrad': True},
+            {'params': net.parameters(), 'weight_decay': 1e-4, 'lr': args.lr, 'amsgrad': True},
             {'params':  criterion.parameters(), 'weight_decay': 1e-4, 'lr': args.lr}
         ])
     else:
         optimizer = optim.SGD([
-            {'params': net.module.parameters(), 'weight_decay': 5e-4},
+            {'params': net.parameters(), 'weight_decay': 5e-4},
             {'params':  criterion.parameters(), 'weight_decay': 5e-4}
         ], lr=args.lr, momentum=0.9)
 
@@ -159,7 +159,7 @@ def train(EPOCHS):
             print('Saving..')
             if not os.path.isdir('checkpoint'):
                 os.mkdir('checkpoint')
-            torch.save({'backbone': net.module.state_dict(),
+            torch.save({'backbone': net.state_dict(),
                         'centers': criterion.state_dict()}, './checkpoint/%s' % args.save)
             best_loss = dcdh_loss.avg
             best_epoch = epoch
