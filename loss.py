@@ -27,8 +27,8 @@ class DualClasswiseLoss(nn.Module):
     def forward(self, x, labels):
         """
         Args:
-            x: feature matrix with shape (batch_size, feat_dim).
-            labels: (batch_size,).
+            x: shape of (batch_size, feat_dim).
+            labels: shape of (batch_size, ) or (batch_size, 1)
         """
 
         #   compute L_1 with single constraint.
@@ -47,14 +47,10 @@ class DualClasswiseLoss(nn.Module):
 
         #   compute L_2 with inner constraint on class centers.
         centers_norm = F.normalize(self.centers, dim=1)
-
         theta_x = 0.5 * self.feat_dim * centers_norm.mm(centers_norm.t())
-
-        #theta_x = self.centers.mm(self.centers.t()) / 2draw_plot_pr.py
         mask = torch.eye(self.num_classes, self.num_classes).bool().cuda()
         theta_x.masked_fill_(mask, 0)
         loss_iner = Log(theta_x).sum() / (self.num_classes*(self.num_classes-1))
 
-        loss_full = self.inner_param * loss_iner + loss
-
+        loss_full = loss + self.inner_param * loss_iner
         return loss_full
