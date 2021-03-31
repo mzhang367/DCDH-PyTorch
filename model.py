@@ -5,7 +5,9 @@ FACE_FEATURES = 1024
 
 
 class DFHNet(nn.Module):
-
+    """
+    our designed backbone in the paper "Deep Center-Based Dual-Constrained Hashing for Discriminative Face Image Retrieval (DCDH)"
+    """
     def weights_init(self, m):
         classname = m.__class__.__name__
         if classname.find('Conv2d') != -1:
@@ -187,7 +189,7 @@ class Block(nn.Module):
 
 class SphereNet_hashing(nn.Module):
     """
-    The CNNs used in paper: "SphereFace: Deep Hypersphere Embedding for Face Recognition"
+    The networks used in paper: "SphereFace: Deep Hypersphere Embedding for Face Recognition"
     """
     def __init__(self, num_layers=64, hashing_bits=48, clf=None):
         super().__init__()
