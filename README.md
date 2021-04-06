@@ -1,5 +1,5 @@
 # Deep Center-Based Dual-Constrained Hashing for Discriminative Face Image Retrieval (DCDH)
-This repository contains the PyTorch implementation of our paper.
+This repository contains the PyTorch implementation of our [paper](https://www.sciencedirect.com/science/article/pii/S0031320321001631).
 
 # Developed by
 **Ming Zhang<sup>1</sup> and Xuefei Zhe<sup>2</sup>**
