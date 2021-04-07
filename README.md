@@ -1,12 +1,11 @@
 # Deep Center-Based Dual-Constrained Hashing for Discriminative Face Image Retrieval (DCDH)
-This repository contains the PyTorch implementation of our [paper](https://www.sciencedirect.com/science/article/pii/S0031320321001631).
-
-# Developed by
-**Ming Zhang<sup>1</sup> and Xuefei Zhe<sup>2</sup>**
+This repository contains the PyTorch implementation of our paper: [Deep Center-Based Dual-Constrained Hashing for Discriminative Face Image Retrieval](https://www.sciencedirect.com/science/article/pii/S0031320321001631) by Ming Zhang<sup>1</sup>, Xuefei Zhe<sup>2</sup>, Shifeng Chen<sup>3</sup> and Hong Yan<sup>1</sup>.
 
 <sup>1</sup> Department of Electrical Engineering, City University of Hong Kong 
 
 <sup>2</sup> Tencent AI Lab
+
+<sup>3</sup> Shenzhen Institutes of Advanced Technology, CAS
 
 # Citation
 If you find the codes are useful to your research, please consider citing our PR paper:
@@ -20,6 +19,8 @@ If you find the codes are useful to your research, please consider citing our PR
   publisher={Elsevier}
 }
 ```
+# Introduction
+We propose a novel center-based framework integrating end-to-end hashing learning and class centers learning simultaneously. Unlike most existing works that are either based on pairwise/triplet labels \[1, 2, 3\] or softmax classification loss \[4, 5\], we apply a class-wise similarity as the supervision. With a normalized Gaussian-based loss function, the first constraint of DCDH minimizes the intra-class variance by clustering intra-class samples into a learnable class center. And the second constraint serves as a regularization term to enlarge the Hamming distance between pairwise class centers for inter-class separability. Furthermore, we introduce a regression matrix to encourage intra-class samples to generate the same binary codes for hashing codes compactness.
 
 # Overview
 <img src="/images/dcdh_framework.png" alt="drawing" width="75%"/>
@@ -64,13 +65,20 @@ This will train the 48-bit hashing model on the dataset FaceScrub with the defau
  ```
  
  ## Evaluation
- We provide various of commonly-used evaulation metrics including mean average precision (mAP), precision and recall under Hamming distance 2 and the precision curve w.r.t. Hamming ranking. Suppose your model for evaluation is under the default folder `./checkpoint`, simply execute:
+ We provide various of commonly-used evaulation metrics including mean average precision (mAP), precision and recall under two Hamming distances and the precision curve w.r.t. Hamming ranking. Suppose your model is under the default folder `./checkpoint`, to evaluate, simply execute:
  ```
  python evaluation.py --load model_name_on_youtube_12bit.tar --dataset youtube --len 12
  ```
  
  # Related Projects
- - Feature Learning based Deep Supervised Hashing with Pairwise Labels [(DPSH)](https://github.com/jiangqy/DPSH-pytorch)
- - Discriminative Deep Hashing for Face Image Retrieval [(DDH)](https://github.com/xjcvip007/DDH)
- - Deep Supervised Discrete Hashing [(DSDH)](https://github.com/liqi-casia/DSDH-HashingCode)
- - Discriminative Deep Attention-Aware Hashing for Face Image Retrieval [(DDAH)](https://github.com/deephashface/DDAH)
+ \[1\] Feature Learning based Deep Supervised Hashing with Pairwise Labels [(DPSH)](https://github.com/jiangqy/DPSH-pytorch)
+ 
+ \[2\] Deep Supervised Hashing with Triplet Labels [(DTSH)](https://github.com/Minione/DTSH)
+ 
+ \[3\] Deep Supervised Discrete Hashing [(DSDH)](https://github.com/liqi-casia/DSDH-HashingCode)
+ 
+ \[4\] Discriminative Deep Hashing for Face Image Retrieval [(DDH)](https://github.com/xjcvip007/DDH)
+ 
+ \[5\] Discriminative Deep Attention-Aware Hashing for Face Image Retrieval [(DDAH)](https://github.com/deephashface/DDAH)
+ 
+ We also thank the above authors for releasing their codes.
