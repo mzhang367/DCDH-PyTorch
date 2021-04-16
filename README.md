@@ -1,22 +1,22 @@
 # Deep Center-Based Dual-Constrained Hashing for Discriminative Face Image Retrieval (DCDH)
-This repository contains the PyTorch implementation of our paper: [Deep Center-Based Dual-Constrained Hashing for Discriminative Face Image Retrieval](https://www.sciencedirect.com/science/article/pii/S0031320321001631) by Ming Zhang<sup>1</sup>, Xuefei Zhe<sup>2</sup>, Shifeng Chen<sup>3</sup> and Hong Yan<sup>1</sup>.
+This repository contains the PyTorch implementation of our paper: [Deep Center-Based Dual-Constrained Hashing for Discriminative Face Image Retrieval](https://www.sciencedirect.com/science/article/pii/S0031320321001631) by Ming Zhang<sup>a</sup>, Xuefei Zhe<sup>b</sup>, Shifeng Chen<sup>c</sup> and Hong Yan<sup>a</sup>.
 
-<sup>1</sup> Department of Electrical Engineering, City University of Hong Kong 
+<sup>a</sup> Department of Electrical Engineering, City University of Hong Kong 
 
-<sup>2</sup> Tencent AI Lab
+<sup>b</sup> Tencent AI Lab
 
-<sup>3</sup> Shenzhen Institutes of Advanced Technology, CAS
+<sup>c</sup> Shenzhen Institutes of Advanced Technology, CAS
 
 # Citation
 If you find the codes are useful to your research, please consider citing our PR paper:
 ```
 @article{zhang2021deep,
-  title={Deep Center-Based Dual-Constrained Hashing for Discriminative Face Image Retrieval},
-  author={Ming Zhang and Xuefei Zhe and Shifeng Chen and Hong Yan},
-  journal={Pattern Recognition},
-  pages={to appear},
-  year={2021},
-  publisher={Elsevier}
+title = {Deep center-based dual-constrained hashing for discriminative face image retrieval},
+author = {Ming Zhang and Xuefei Zhe and Shifeng Chen and Hong Yan},
+journal = {Pattern Recognition},
+volume = {117},
+pages = {107976},
+year = {2021},
 }
 ```
 # Introduction
