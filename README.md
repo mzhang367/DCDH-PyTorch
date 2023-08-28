@@ -46,9 +46,7 @@ We directly use the same data of FaceScrub and YouTube Faces datasets as release
  
  - Subset of VGGFace2:
  
- The processed data of the subset of VGGFace2 is also provided for your download: (total size ~2.4GB)
- 
- https://drive.google.com/open?id=1PaXIfSrw1SC1uiv4Affgm882-Q-w_icl
+ The processed data of the subset of VGGFace2 is also provided for your [download](https://drive.google.com/file/d/1OLtVgQQ59alSAsyQdqWZe0t_KiNbSUMm/view?usp=sharing) (total size ~2.4GB).
  
  # Models
  We release the trained models on two datasets: FaceScrub and YouTube Faces under four different code lengths {12, 24, 36, 48}, respectively. The models are named following the rule of "dcdh_\[*dataset*]\[*length*].tar" and can be downloaded [here](https://drive.google.com/open?id=152TYljUGI4tDdJJhtjDr9bVLYRxuDK5n).
